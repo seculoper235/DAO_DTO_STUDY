@@ -41,12 +41,37 @@ public class UserDao {
 
     public int insertUser(UserDto user) {
         SqlParameterSource params = new BeanPropertySqlParameterSource(user);
-        return simpleInsert.execute(params);
+        // 단순히 실행하는 것만이 아닌, 입력한 객체의 키값을마도 반환함
+        return (int) simpleInsert.executeAndReturnKey(params);
+    }
+
+    // 다수의 유저 insert 가능
+    public int[] insertUserList(List<UserDto> userList) {
+        // 파라미터 소스 배열 생성
+        SqlParameterSource[] paramList = new SqlParameterSource[userList.size()];
+
+        // for문을 돌며 일일히 객체 생성(비효율적, 개선 필요)
+        for (int i=0; i<userList.size(); i++) {
+            paramList[i] = new BeanPropertySqlParameterSource(userList.get(i));
+        }
+        return simpleInsert.executeBatch(paramList);
     }
 
     public int updateUser(UserDto user) {
         SqlParameterSource params = new BeanPropertySqlParameterSource(user);
         return namedTemplate.update(UPDATE, params);
+    }
+
+    // 다수의 유저 update도 가능(insertUserList와 비슷)
+    public int[] updateUserList(List<UserDto> userList) {
+        // 파라미터 소스 배열 생성
+        SqlParameterSource[] paramList = new SqlParameterSource[userList.size()];
+
+        // for문을 돌며 일일히 객체 생성(비효율적, 개선 필요)
+        for (int i=0; i<userList.size(); i++) {
+            paramList[i] = new BeanPropertySqlParameterSource(userList.get(i));
+        }
+        return namedTemplate.batchUpdate(UPDATE, paramList);
     }
 
     public int deleteUserById(int userId) {
