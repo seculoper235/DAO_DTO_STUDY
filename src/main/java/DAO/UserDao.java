@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
@@ -47,13 +48,8 @@ public class UserDao {
 
     // 다수의 유저 insert 가능
     public int[] insertUserList(List<UserDto> userList) {
-        // 파라미터 소스 배열 생성
-        SqlParameterSource[] paramList = new SqlParameterSource[userList.size()];
-
-        // for문을 돌며 일일히 객체 생성(비효율적, 개선 필요)
-        for (int i=0; i<userList.size(); i++) {
-            paramList[i] = new BeanPropertySqlParameterSource(userList.get(i));
-        }
+        // createBatch를 사용하여 SqlParameterSource 배열을 만듦
+        SqlParameterSource[] paramList = SqlParameterSourceUtils.createBatch(userList.toArray());
         return simpleInsert.executeBatch(paramList);
     }
 
@@ -64,13 +60,8 @@ public class UserDao {
 
     // 다수의 유저 update도 가능(insertUserList와 비슷)
     public int[] updateUserList(List<UserDto> userList) {
-        // 파라미터 소스 배열 생성
-        SqlParameterSource[] paramList = new SqlParameterSource[userList.size()];
-
-        // for문을 돌며 일일히 객체 생성(비효율적, 개선 필요)
-        for (int i=0; i<userList.size(); i++) {
-            paramList[i] = new BeanPropertySqlParameterSource(userList.get(i));
-        }
+        // createBatch를 사용하여 SqlParameterSource 배열을 만듦
+        SqlParameterSource[] paramList = SqlParameterSourceUtils.createBatch(userList.toArray());
         return namedTemplate.batchUpdate(UPDATE, paramList);
     }
 
